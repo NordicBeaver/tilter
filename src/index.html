@@ -9,11 +9,55 @@
   <title>Document</title>
 </head>
 
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
+
+  #startScreen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  #startButton {
+    border: 4px solid green;
+    font-size: 42px;
+    ;
+  }
+
+  #gameScreen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    border: 1px solid black;
+  }
+</style>
+
 <body>
-  <h1>Hi</h1>
-  <button id="btn">BUTTON</button>
-  <span id="console"></span>
-  <span id="orientation"></span>
+
+  <div id="startScreen">
+    <button id="startButton">Start</button>
+  </div>
+
+  <div id="gameScreen">
+    <canvas id="gameCanvas" width="512" height="512"></canvas>
+  </div>
+
 </body>
 
 </html>
