@@ -5,6 +5,7 @@ const gameHeight = 512;
 
 export interface GameState {
   playerBall: Ball;
+  walls: Wall[];
 }
 
 export interface Ball {
@@ -15,9 +16,17 @@ export interface Ball {
   speedY: number;
 }
 
+export interface Wall {
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+}
+
 export function createGameState() {
   const gameState: GameState = {
     playerBall: createBall(),
+    walls: [createWall(20, 20), createWall(120, 120)],
   };
   return gameState;
 }
@@ -33,9 +42,20 @@ function createBall() {
   return ball;
 }
 
+function createWall(posX: number, posY: number) {
+  const wall: Wall = {
+    posX: posX,
+    posY: posY,
+    width: 40,
+    height: 40,
+  };
+  return wall;
+}
+
 export function nextGameState(gameState: GameState, deviceOrientation: DeviceOrientation) {
   const nGameState: GameState = {
     playerBall: nextBall(gameState.playerBall, deviceOrientation),
+    walls: gameState.walls,
   };
   return nGameState;
 }
