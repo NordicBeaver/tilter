@@ -1,4 +1,5 @@
 import { DeviceOrientation } from './device';
+import { isBetween } from './util';
 
 const gameWidth = 512;
 const gameHeight = 512;
@@ -26,7 +27,12 @@ export interface Wall {
 export function createGameState() {
   const gameState: GameState = {
     playerBall: createBall(),
-    walls: [createWall(20, 20), createWall(120, 120)],
+    walls: [
+      createWall(0, 0, gameWidth, 40),
+      createWall(gameWidth - 40, 0, 40, gameHeight),
+      createWall(0, gameHeight - 40, gameWidth, 40),
+      createWall(0, 0, 40, gameHeight),
+    ],
   };
   return gameState;
 }
@@ -42,19 +48,23 @@ function createBall() {
   return ball;
 }
 
-function createWall(posX: number, posY: number) {
+function createWall(posX: number, posY: number, width: number = 40, height: number = 40) {
   const wall: Wall = {
     posX: posX,
     posY: posY,
-    width: 40,
-    height: 40,
+    width: width,
+    height: height,
   };
   return wall;
 }
 
 export function nextGameState(gameState: GameState, deviceOrientation: DeviceOrientation) {
+  let nBall = nextBall(gameState.playerBall, deviceOrientation);
+  for (const wall of gameState.walls) {
+    nBall = processWallCollisions(nBall, wall);
+  }
   const nGameState: GameState = {
-    playerBall: nextBall(gameState.playerBall, deviceOrientation),
+    playerBall: nBall,
     walls: gameState.walls,
   };
   return nGameState;
@@ -76,6 +86,7 @@ function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
     speedX: nextSpeedX,
     speedY: nextSpeedY,
   };
+
   return nBall;
 }
 
@@ -88,4 +99,47 @@ function nextBallPos(currentPos: number, speed: number, radius: number, lowerBou
     newPos = upperBound - radius;
   }
   return newPos;
+}
+
+function processWallCollisions(ball: Ball, wall: Wall) {
+  let newPosX = ball.posX;
+  let newPosY = ball.posY;
+  let newSpeedX = ball.speedX;
+  let newSpeedY = ball.speedY;
+
+  if (isBetween(ball.posX, wall.posX, wall.posX + wall.width)) {
+    if (isBetween(ball.posY + ball.radius, wall.posY, wall.posY + wall.height)) {
+      // Ball hit wall's top side.
+      newPosY = wall.posY - ball.radius;
+      newSpeedY = 0;
+    }
+    if (isBetween(ball.posY - ball.radius, wall.posY, wall.posY + wall.height)) {
+      // Ball hit wall's bottom side.
+      newPosY = wall.posY + wall.height + ball.radius;
+      newSpeedY = 0;
+    }
+  }
+
+  if (isBetween(ball.posY, wall.posY, wall.posY + wall.height)) {
+    if (isBetween(ball.posX + ball.radius, wall.posX, wall.posX + wall.width)) {
+      // Ball hit wall's left side.
+      newPosX = wall.posX - ball.radius;
+      newSpeedX = 0;
+    }
+    if (isBetween(ball.posX - ball.radius, wall.posX, wall.posX + wall.width)) {
+      // Ball hit wall's right side.
+      newPosX = wall.posX + wall.width + ball.radius;
+      newSpeedX = 0;
+    }
+  }
+
+  const nBall: Ball = {
+    radius: ball.radius,
+    posX: newPosX,
+    posY: newPosY,
+    speedX: newSpeedX,
+    speedY: newSpeedY,
+  };
+
+  return nBall;
 }
