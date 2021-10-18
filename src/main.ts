@@ -1,6 +1,7 @@
 import { deviceOrientation, requestDeviceOrientationTracking, startDeviceOrientationTracking } from './device';
 import { createGameState, nextGameState } from './game';
 import { createLevel } from './level';
+import { generateRandomLevel } from './randomLevelGenerator';
 import { render } from './render';
 
 const gameWidth = 512;
@@ -14,7 +15,7 @@ gameScreen.style.display = 'none';
 
 const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 
-const level = createLevel();
+const level = generateRandomLevel(8, 8);
 let gameState = createGameState(level);
 
 startButton.addEventListener('click', async () => {
@@ -33,8 +34,6 @@ startButton.addEventListener('click', async () => {
 
 function startGame() {
   const onFrameRequest: FrameRequestCallback = (time) => {
-    console.log(time);
-
     gameState = nextGameState(gameState, deviceOrientation);
 
     const gameCanvasContext = gameCanvas.getContext('2d')!;
