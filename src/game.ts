@@ -1,4 +1,5 @@
 import { DeviceOrientation } from './device';
+import { BoxCollider, devectCollision, SphereCollider } from './physics/colliders';
 import { isBetween } from './util';
 
 const gameWidth = 512;
@@ -15,6 +16,7 @@ export interface Ball {
   posY: number;
   speedX: number;
   speedY: number;
+  collider: SphereCollider;
 }
 
 export interface Wall {
@@ -22,6 +24,7 @@ export interface Wall {
   posY: number;
   width: number;
   height: number;
+  collider: BoxCollider;
 }
 
 export function createGameState() {
@@ -32,6 +35,8 @@ export function createGameState() {
       createWall(gameWidth - 40, 0, 40, gameHeight),
       createWall(0, gameHeight - 40, gameWidth, 40),
       createWall(0, 0, 40, gameHeight),
+      createWall(100, 100, 40, 40),
+      createWall(200, 300, 40, 40),
     ],
   };
   return gameState;
@@ -44,6 +49,14 @@ function createBall() {
     posY: gameHeight / 2,
     speedX: 0,
     speedY: 0,
+    collider: {
+      type: 'sphere',
+      position: {
+        x: gameWidth / 2,
+        y: gameHeight / 2,
+      },
+      radius: 20,
+    },
   };
   return ball;
 }
@@ -54,6 +67,15 @@ function createWall(posX: number, posY: number, width: number = 40, height: numb
     posY: posY,
     width: width,
     height: height,
+    collider: {
+      type: 'box',
+      position: {
+        x: posX,
+        y: posY,
+      },
+      width: width,
+      height: height,
+    },
   };
   return wall;
 }
@@ -85,6 +107,14 @@ function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
     posY: nextPosY,
     speedX: nextSpeedX,
     speedY: nextSpeedY,
+    collider: {
+      type: 'sphere',
+      position: {
+        x: nextPosX,
+        y: nextPosY,
+      },
+      radius: ball.collider.radius,
+    },
   };
 
   return nBall;
@@ -107,29 +137,19 @@ function processWallCollisions(ball: Ball, wall: Wall) {
   let newSpeedX = ball.speedX;
   let newSpeedY = ball.speedY;
 
-  if (isBetween(ball.posX, wall.posX, wall.posX + wall.width)) {
-    if (isBetween(ball.posY + ball.radius, wall.posY, wall.posY + wall.height)) {
-      // Ball hit wall's top side.
-      newPosY = wall.posY - ball.radius;
-      newSpeedY = 0;
+  const collision = devectCollision(ball.collider, wall.collider);
+  if (collision != null) {
+    if (collision.x !== 0) {
+      newPosX = newPosX - collision.x;
+      if ((newSpeedX > 0 && collision.x > 0) || (newSpeedX < 0 && collision.x < 0)) {
+        newSpeedX = 0;
+      }
     }
-    if (isBetween(ball.posY - ball.radius, wall.posY, wall.posY + wall.height)) {
-      // Ball hit wall's bottom side.
-      newPosY = wall.posY + wall.height + ball.radius;
-      newSpeedY = 0;
-    }
-  }
-
-  if (isBetween(ball.posY, wall.posY, wall.posY + wall.height)) {
-    if (isBetween(ball.posX + ball.radius, wall.posX, wall.posX + wall.width)) {
-      // Ball hit wall's left side.
-      newPosX = wall.posX - ball.radius;
-      newSpeedX = 0;
-    }
-    if (isBetween(ball.posX - ball.radius, wall.posX, wall.posX + wall.width)) {
-      // Ball hit wall's right side.
-      newPosX = wall.posX + wall.width + ball.radius;
-      newSpeedX = 0;
+    if (collision.y !== 0) {
+      newPosY = newPosY - collision.y;
+      if ((newSpeedY > 0 && collision.y > 0) || (newSpeedY < 0 && collision.y < 0)) {
+        newSpeedY = 0;
+      }
     }
   }
 
@@ -139,6 +159,14 @@ function processWallCollisions(ball: Ball, wall: Wall) {
     posY: newPosY,
     speedX: newSpeedX,
     speedY: newSpeedY,
+    collider: {
+      type: 'sphere',
+      position: {
+        x: newPosX,
+        y: newPosY,
+      },
+      radius: ball.collider.radius,
+    },
   };
 
   return nBall;
