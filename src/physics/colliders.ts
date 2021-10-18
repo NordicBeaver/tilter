@@ -16,7 +16,7 @@ export interface BoxCollider {
 
 export type Collider = SphereCollider | BoxCollider;
 
-export function devectCollision(collider1: Collider, collider2: Collider): Vector2d | null {
+export function detectCollision(collider1: Collider, collider2: Collider): Vector2d | null {
   if (collider1.type === 'sphere' && collider2.type === 'box') {
     return detectCollisionSphereBox(collider1, collider2);
   } else {

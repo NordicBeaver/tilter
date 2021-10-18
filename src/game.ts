@@ -5,6 +5,8 @@ import { isBetween } from './util';
 const gameWidth = 512;
 const gameHeight = 512;
 
+const gravityAcceleration = 1;
+
 export interface GameState {
   playerBall: Ball;
   walls: Wall[];
@@ -93,8 +95,8 @@ export function nextGameState(gameState: GameState, deviceOrientation: DeviceOri
 }
 
 function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
-  const accX = deviceOrientation.gamma / 100;
-  const accY = deviceOrientation.beta / 100;
+  const accX = gravityAcceleration * Math.tan((deviceOrientation.gamma / 180) * Math.PI);
+  const accY = gravityAcceleration * Math.tan((deviceOrientation.beta / 180) * Math.PI);
 
   const nextSpeedX = ball.speedX + accX;
   const nextSpeedY = ball.speedY + accY;
