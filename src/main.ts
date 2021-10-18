@@ -1,5 +1,6 @@
 import { deviceOrientation, requestDeviceOrientationTracking, startDeviceOrientationTracking } from './device';
 import { createGameState, nextGameState } from './game';
+import { createLevel } from './level';
 import { render } from './render';
 
 const gameWidth = 512;
@@ -13,7 +14,8 @@ gameScreen.style.display = 'none';
 
 const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 
-let gameState = createGameState();
+const level = createLevel();
+let gameState = createGameState(level);
 
 startButton.addEventListener('click', async () => {
   try {

@@ -1,12 +1,16 @@
 import { DeviceOrientation } from './device';
+import * as Level from './level';
 import { BoxCollider, detectCollision, SphereCollider } from './physics/colliders';
-import { isBetween } from './util';
 import { Vector2d } from './vectors';
 
 const gameWidth = 512;
 const gameHeight = 512;
+const levelCellWidth = gameWidth / Level.levelWidth;
+const levelCellHeight = gameHeight / Level.levelWidth;
 
 const gravityAcceleration = 1;
+
+const wallThickness = 8;
 
 export interface GameState {
   playerBall: Ball;
@@ -38,16 +42,15 @@ export interface Goal {
   collider: SphereCollider;
 }
 
-export function createGameState() {
+export function createGameState(level: Level.Level) {
   const gameState: GameState = {
-    playerBall: createBall(),
+    playerBall: createBall((level.start.x + 0.5) * levelCellWidth, (level.start.y + 0.5) * levelCellHeight),
     walls: [
-      createWall(0, 0, gameWidth, 40),
-      createWall(gameWidth - 40, 0, 40, gameHeight),
-      createWall(0, gameHeight - 40, gameWidth, 40),
-      createWall(0, 0, 40, gameHeight),
-      createWall(100, 100, 40, 40),
-      createWall(200, 300, 40, 40),
+      createWall(0, 0, gameWidth, wallThickness),
+      createWall(gameWidth - wallThickness, 0, wallThickness, gameHeight),
+      createWall(0, gameHeight - wallThickness, gameWidth, wallThickness),
+      createWall(0, 0, wallThickness, gameHeight),
+      ...level.walls.map((wall) => createWallFromLevelData(wall)),
     ],
     goal: createGoal(400, 400),
     roundWon: false,
@@ -55,18 +58,18 @@ export function createGameState() {
   return gameState;
 }
 
-function createBall() {
+function createBall(posX: number, posY: number) {
   const ball: Ball = {
     radius: 20,
-    posX: gameWidth / 2,
-    posY: gameHeight / 2,
+    posX: posX,
+    posY: posY,
     speedX: 0,
     speedY: 0,
     collider: {
       type: 'sphere',
       position: {
-        x: gameWidth / 2,
-        y: gameHeight / 2,
+        x: posX,
+        y: posY,
       },
       radius: 20,
     },
@@ -90,6 +93,17 @@ function createWall(posX: number, posY: number, width: number = 40, height: numb
       height: height,
     },
   };
+  return wall;
+}
+
+function createWallFromLevelData(wallData: Level.Wall) {
+  const posX = wallData.cell.x * levelCellWidth + (wallData.side === 'right' ? levelCellWidth : 0) - wallThickness / 2;
+  const posY =
+    wallData.cell.y * levelCellHeight + (wallData.side === 'bottom' ? levelCellHeight : 0) - wallThickness / 2;
+  const width = wallData.side === 'top' || wallData.side === 'bottom' ? levelCellWidth + wallThickness : wallThickness;
+  const height =
+    wallData.side === 'left' || wallData.side === 'right' ? levelCellHeight + wallThickness : wallThickness;
+  const wall = createWall(posX, posY, width, height);
   return wall;
 }
 
