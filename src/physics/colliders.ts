@@ -16,11 +16,30 @@ export interface BoxCollider {
 
 export type Collider = SphereCollider | BoxCollider;
 
+export function detectCollision(sphereCollider1: SphereCollider, sphereCollider2: SphereCollider): Vector2d | null;
+export function detectCollision(sphereCollider: SphereCollider, boxCollider: BoxCollider): Vector2d | null;
 export function detectCollision(collider1: Collider, collider2: Collider): Vector2d | null {
-  if (collider1.type === 'sphere' && collider2.type === 'box') {
+  if (collider1.type === 'sphere' && collider2.type === 'sphere') {
+    return detectCollisionSphereSphere(collider1, collider2);
+  } else if (collider1.type === 'sphere' && collider2.type === 'box') {
     return detectCollisionSphereBox(collider1, collider2);
   } else {
     throw new Error(`Collision detection for ${collider1.type} and ${collider2.type} not implemented`);
+  }
+}
+
+function detectCollisionSphereSphere(sphere1: SphereCollider, sphere2: SphereCollider): Vector2d | null {
+  const centerToCenter = substractVectors(sphere2.position, sphere1.position);
+  const centerToCenterDistance = vectorLength(centerToCenter);
+  if (centerToCenterDistance < sphere1.radius + sphere2.radius) {
+    const collisionVectorDistance = sphere1.radius + sphere2.radius - centerToCenterDistance;
+    const collisionVector: Vector2d = {
+      x: (centerToCenter.x / centerToCenterDistance) * collisionVectorDistance,
+      y: (centerToCenter.y / centerToCenterDistance) * collisionVectorDistance,
+    };
+    return collisionVector;
+  } else {
+    return null;
   }
 }
 

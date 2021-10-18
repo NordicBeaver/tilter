@@ -22,20 +22,29 @@ startButton.addEventListener('click', async () => {
       startScreen.style.display = 'none';
       gameScreen.style.display = 'flex';
       startDeviceOrientationTracking();
+      startGame();
     }
   } catch (e) {
     console.log(e);
   }
 });
 
-const onFrameRequest: FrameRequestCallback = (time) => {
-  console.log(time);
+function startGame() {
+  const onFrameRequest: FrameRequestCallback = (time) => {
+    console.log(time);
 
-  gameState = nextGameState(gameState, deviceOrientation);
+    gameState = nextGameState(gameState, deviceOrientation);
 
-  const gameCanvasContext = gameCanvas.getContext('2d')!;
-  render(gameCanvasContext, gameState, gameWidth, gameHeight);
+    const gameCanvasContext = gameCanvas.getContext('2d')!;
+    render(gameCanvasContext, gameState, gameWidth, gameHeight);
 
+    if (gameState.roundWon) {
+      gameScreen.style.display = 'none';
+      startScreen.style.display = 'flex';
+      return;
+    }
+
+    window.requestAnimationFrame(onFrameRequest);
+  };
   window.requestAnimationFrame(onFrameRequest);
-};
-window.requestAnimationFrame(onFrameRequest);
+}

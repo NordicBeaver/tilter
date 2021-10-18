@@ -1,6 +1,7 @@
 import { DeviceOrientation } from './device';
-import { BoxCollider, devectCollision, SphereCollider } from './physics/colliders';
+import { BoxCollider, detectCollision, SphereCollider } from './physics/colliders';
 import { isBetween } from './util';
+import { Vector2d } from './vectors';
 
 const gameWidth = 512;
 const gameHeight = 512;
@@ -10,6 +11,8 @@ const gravityAcceleration = 1;
 export interface GameState {
   playerBall: Ball;
   walls: Wall[];
+  goal: Goal;
+  roundWon: boolean;
 }
 
 export interface Ball {
@@ -29,6 +32,12 @@ export interface Wall {
   collider: BoxCollider;
 }
 
+export interface Goal {
+  position: Vector2d;
+  radius: number;
+  collider: SphereCollider;
+}
+
 export function createGameState() {
   const gameState: GameState = {
     playerBall: createBall(),
@@ -40,6 +49,8 @@ export function createGameState() {
       createWall(100, 100, 40, 40),
       createWall(200, 300, 40, 40),
     ],
+    goal: createGoal(400, 400),
+    roundWon: false,
   };
   return gameState;
 }
@@ -82,14 +93,37 @@ function createWall(posX: number, posY: number, width: number = 40, height: numb
   return wall;
 }
 
+function createGoal(posx: number, posY: number) {
+  const goal: Goal = {
+    position: {
+      x: posY,
+      y: posY,
+    },
+    radius: 10,
+    collider: {
+      type: 'sphere',
+      position: {
+        x: posY,
+        y: posY,
+      },
+      radius: 10,
+    },
+  };
+  return goal;
+}
+
 export function nextGameState(gameState: GameState, deviceOrientation: DeviceOrientation) {
   let nBall = nextBall(gameState.playerBall, deviceOrientation);
   for (const wall of gameState.walls) {
     nBall = processWallCollisions(nBall, wall);
   }
+
+  const roundWon = detectCollision(gameState.playerBall.collider, gameState.goal.collider) != null;
+
   const nGameState: GameState = {
+    ...gameState,
     playerBall: nBall,
-    walls: gameState.walls,
+    roundWon: roundWon,
   };
   return nGameState;
 }
@@ -139,7 +173,7 @@ function processWallCollisions(ball: Ball, wall: Wall) {
   let newSpeedX = ball.speedX;
   let newSpeedY = ball.speedY;
 
-  const collision = devectCollision(ball.collider, wall.collider);
+  const collision = detectCollision(ball.collider, wall.collider);
   if (collision != null) {
     if (collision.x !== 0) {
       newPosX = newPosX - collision.x;
