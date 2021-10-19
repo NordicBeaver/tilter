@@ -52,7 +52,7 @@ export function createGameState(level: Level.Level) {
       createWall(0, 0, wallThickness, gameHeight),
       ...level.walls.map((wall) => createWallFromLevelData(wall)),
     ],
-    goal: createGoal(400, 400),
+    goal: createGoal((level.finish.x + 0.5) * levelCellWidth, (level.finish.y + 0.5) * levelCellHeight),
     roundWon: false,
   };
   return gameState;
