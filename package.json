@@ -1,11 +1,18 @@
 {
   "name": "tilter",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "parcel src/index.html --https",
+    "build": "parcel build src/index.html",
+    "prebuild": "rimraf dist"
+  },
   "dependencies": {
     "@types/lodash": "^4.14.175",
     "lodash": "^4.17.21",
     "parcel": "^2.0.0-rc.0"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2"
   }
 }
