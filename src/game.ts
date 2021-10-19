@@ -143,8 +143,8 @@ export function nextGameState(gameState: GameState, deviceOrientation: DeviceOri
 }
 
 function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
-  const accX = gravityAcceleration * Math.tan((deviceOrientation.gamma / 180) * Math.PI);
-  const accY = gravityAcceleration * Math.tan((deviceOrientation.beta / 180) * Math.PI);
+  const accX = gravityAcceleration * Math.sin((deviceOrientation.gamma / 180) * Math.PI);
+  const accY = gravityAcceleration * Math.sin((deviceOrientation.beta / 180) * Math.PI);
 
   const nextSpeedX = ball.speedX + accX;
   const nextSpeedY = ball.speedY + accY;
