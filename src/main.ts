@@ -14,6 +14,7 @@ const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 const gameWidth = 512;
 const gameHeight = 512;
 
+let lastFrameTime: number | null = null;
 let gameState: GameState | null = null;
 
 startButton.addEventListener('click', async () => {
@@ -33,23 +34,33 @@ startButton.addEventListener('click', async () => {
 });
 
 function startGame() {
-  const onFrameRequest: FrameRequestCallback = (time) => {
-    if (gameState == null) {
-      return;
-    }
-
-    gameState = nextGameState(gameState, deviceOrientation);
-
-    const gameCanvasContext = gameCanvas.getContext('2d')!;
-    render(gameCanvasContext, gameState, gameWidth, gameHeight);
-
-    if (gameState.roundWon) {
-      gameScreen.style.display = 'none';
-      startScreen.style.display = 'flex';
-      return;
-    }
-
-    window.requestAnimationFrame(onFrameRequest);
-  };
   window.requestAnimationFrame(onFrameRequest);
 }
+
+const onFrameRequest: FrameRequestCallback = (time) => {
+  if (gameState == null) {
+    window.requestAnimationFrame(onFrameRequest);
+    return;
+  }
+  if (lastFrameTime == null) {
+    lastFrameTime = time;
+    window.requestAnimationFrame(onFrameRequest);
+    return;
+  }
+
+  const deltaTime = time - lastFrameTime;
+  lastFrameTime = time;
+
+  gameState = nextGameState(gameState, deviceOrientation, deltaTime);
+
+  const gameCanvasContext = gameCanvas.getContext('2d')!;
+  render(gameCanvasContext, gameState, gameWidth, gameHeight);
+
+  if (gameState.roundWon) {
+    gameScreen.style.display = 'none';
+    startScreen.style.display = 'flex';
+    return;
+  }
+
+  window.requestAnimationFrame(onFrameRequest);
+};

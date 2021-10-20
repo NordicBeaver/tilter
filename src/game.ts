@@ -126,8 +126,8 @@ function createGoal(posx: number, posY: number) {
   return goal;
 }
 
-export function nextGameState(gameState: GameState, deviceOrientation: DeviceOrientation) {
-  let nBall = nextBall(gameState.playerBall, deviceOrientation);
+export function nextGameState(gameState: GameState, deviceOrientation: DeviceOrientation, deltaTime: number) {
+  let nBall = nextBall(gameState.playerBall, deviceOrientation, deltaTime);
   for (const wall of gameState.walls) {
     nBall = processWallCollisions(nBall, wall);
   }
@@ -142,14 +142,14 @@ export function nextGameState(gameState: GameState, deviceOrientation: DeviceOri
   return nGameState;
 }
 
-function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
+function nextBall(ball: Ball, deviceOrientation: DeviceOrientation, deltaTime: number) {
   const accX = gravityAcceleration * Math.sin((deviceOrientation.gamma / 180) * Math.PI);
   const accY = gravityAcceleration * Math.sin((deviceOrientation.beta / 180) * Math.PI);
 
-  const nextSpeedX = ball.speedX + accX;
-  const nextSpeedY = ball.speedY + accY;
-  const nextPosX = nextBallPos(ball.posX, ball.speedX, ball.radius, 0, gameWidth);
-  const nextPosY = nextBallPos(ball.posY, ball.speedY, ball.radius, 0, gameHeight);
+  const nextSpeedX = ball.speedX + (accX * deltaTime) / 20;
+  const nextSpeedY = ball.speedY + (accY * deltaTime) / 20;
+  const nextPosX = ball.posX + (ball.speedX * deltaTime) / 20;
+  const nextPosY = ball.posY + (ball.speedY * deltaTime) / 20;
 
   const nBall: Ball = {
     radius: ball.radius,
@@ -168,17 +168,6 @@ function nextBall(ball: Ball, deviceOrientation: DeviceOrientation) {
   };
 
   return nBall;
-}
-
-function nextBallPos(currentPos: number, speed: number, radius: number, lowerBound: number, upperBound: number) {
-  let newPos = currentPos + speed;
-  if (currentPos - radius < lowerBound) {
-    newPos = radius;
-  }
-  if (newPos + radius > upperBound) {
-    newPos = upperBound - radius;
-  }
-  return newPos;
 }
 
 function processWallCollisions(ball: Ball, wall: Wall) {
