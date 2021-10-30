@@ -10,7 +10,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.175",
     "lodash": "^4.17.21",
-    "parcel": "^2.0.0-rc.0"
+    "parcel": "2.0.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2"
