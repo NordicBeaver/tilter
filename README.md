@@ -9,3 +9,7 @@ A simple labyrinth game made for mobile that you can play in a browser.
 [Video](https://nordicbeaver.fra1.digitaloceanspaces.com/Tilter_promo.mov) of gameplay.
 
 Playable [demo](https://tilter.nordicbeaver.io/).
+
+## YouTube
+
+[Here](https://youtu.be/Zg8sSizPfYg) is a short video of how I made this.
